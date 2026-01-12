@@ -1,0 +1,20 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@using SMSLiveResellerSite2026.Pages.Messaging.Messages
+
+@page "/Messaging/Messages"
+@attribute [Authorize]
+
+<PageTitle>SMSLiveResellerSite2026 - Messages</PageTitle>
+<Title>My Messages</Title>
+
+<Tabs>
+    <TabPage Title="Sent Messages" Icon="fa fa-check">
+        <SentMessages></SentMessages>
+    </TabPage>
+@*     <TabPage Title="Draft Messages" Icon="fa fa-edit"> fa-check-circle fa-pause-circle
+        <DraftMessages></DraftMessages>
+    </TabPage>
+    *@    <TabPage Title="Pending / Scheduled" Icon="fa fa-pause">
+        <CurrentlySending></CurrentlySending>
+    </TabPage>
+</Tabs>

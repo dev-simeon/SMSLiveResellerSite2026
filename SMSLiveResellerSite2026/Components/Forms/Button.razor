@@ -1,0 +1,77 @@
+﻿﻿@if (string.IsNullOrEmpty(HRef))
+{
+    <button class="@GetButtonCss()" type="@ButtonType" @onclick="OnClick" disabled="@Disabled">
+        <i class="@GetIconCss()"></i>@ChildContent
+    </button>
+}
+else
+{
+    <a class="@GetButtonCss()" href="@(Disabled ? null : HRef)" aria-disabled="@Disabled"
+        tabindex="@(Disabled ? "-1" : "")">
+        <i class="@GetIconCss()"></i>@ChildContent
+    </a>
+}
+
+@code {
+    [Parameter] public string? HRef { get; set; }
+    [Parameter] public string? CustomIcon { get; set; }
+    [Parameter] public Style Type { get; set; } = Style.DEFAULT;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public bool Disabled { get; set; } = false;
+    [Parameter] public string ButtonType { get; set; } = "button";
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+    public enum Style { DEFAULT, PRIMARY, ADD, EDIT, SAVE, DELETE, DOWNLOAD, CANCEL, CUSTOM }
+
+    private string? GetIconCss()
+    {
+        var me = ChildContent != null ? " me-2" : "";
+
+        switch (Type)
+        {
+            case Style.ADD:
+                return $"fa fa-plus{me}";
+
+            case Style.EDIT:
+                return $"fa fa-edit{me}";
+
+            case Style.SAVE:
+                return $"fa fa-save{me}";
+
+            case Style.DELETE:
+                return $"fa fa-trash-alt{me}";
+
+            case Style.DOWNLOAD:
+                return $"fa fa-download{me}";
+
+            case Style.CANCEL:
+                return $"fa fa-cancel{me}";
+
+            default:
+                return $"{CustomIcon}{me}";
+        }
+    }
+
+    private string GetButtonCss()
+    {
+        var css = "btn";
+        switch (Type)
+        {
+            case Style.CANCEL:
+                css += " btn-secondary";
+                break;
+
+            case Style.DELETE:
+                css += " btn-danger";
+                break;
+
+            default:
+                css += " btn-primary";
+                break;
+        }
+
+        if (Disabled)
+            css += " disabled";
+        return css;
+    }
+}

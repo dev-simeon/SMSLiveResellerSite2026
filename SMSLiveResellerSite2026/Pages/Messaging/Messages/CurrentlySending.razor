@@ -1,0 +1,119 @@
+﻿@using SMSLiveResellerSite2026.Components.Data
+@using SMSLiveResellerSite2026.Components.Formatting
+@using SMSLiveResellerSite2026.Components.Layouts
+@using SMSLiveResellerSite2026.Shared
+<Card>
+    <Body>
+        <SearchArea>
+            <LeftRight>
+                <Left>
+                    <input type="search" class="form-control" placeholder="Search..." @bind="searchText" @oninput="OnSearch" />
+                </Left>
+            </LeftRight>
+        </SearchArea>
+        <Table Items="GetFilteredItems()">
+            <Columns>
+                <Column Header="Scheduled Time" Width="140px">
+                    <FormatDate DateTime="@context.DateSubmitted"></FormatDate><br />
+                    <span class="badge text-bg-warning">@context.Status</span>
+                </Column>
+                <Column Header="Sender ID" Width="100px">
+                    @context.SenderID
+                </Column>
+                <Column Header="Message">
+                    @context.MessageText.Left(160)
+                    <small class="text-muted">@context.MessageParts Page (@context.MessageText.Length)</small>
+                </Column>
+                <Column Width="5%">
+                    <div class="d-flex flex-column">
+                        <div class="d-flex gap-2">
+                            <span>Sent:</span>
+                            <FormatNumber Number="@context.TotalProcessed"></FormatNumber>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <span>Failed:</span>
+                            <FormatNumber Number="@context.TotalFailed"></FormatNumber>
+                        </div>
+                    </div>
+                </Column>
+                <Column Width="5%">
+                    <Actions>
+                        <button class="btn btn-outline-secondary"
+                                @onclick="e => ResumeBatch(context.BatchID)"
+                                @onclick:stopPropagation="true" title="Resume Batch">
+                            <i class="fa fa-play"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary"
+                                @onclick="e => AbortBatch(context.BatchID)"
+                                @onclick:stopPropagation="true" title="Abort Batch">
+                            <i class="fa fa-stop"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary" 
+                                @onclick="e => dlrModal.Show(context.BatchID)"
+                                @onclick:stopPropagation="true" title="View Delivery Report">
+                            <i class="fa fa-envelope-open-text"></i>
+                        </button>
+                    </Actions>
+                </Column>
+            </Columns>
+        </Table>
+    </Body>
+</Card>
+
+<DeliveryReport @ref="dlrModal"></DeliveryReport>
+
+@code {
+    private DeliveryReport dlrModal = new();
+
+    private string searchText = string.Empty;
+    private List<SmsBatchResponse>? items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    protected async Task LoadData()
+    {
+        var response = await apiClient.SmsBatchPendingListAsync();
+        items = response.Result.ToList();
+    }
+
+    private async Task AbortBatch(long batchId)
+    {
+        var message = "Are you sure you want to cancel this batch?";
+        bool confirmed = await alert.Confirm(message, "Confirm");
+
+        if (confirmed)
+        {
+            await apiClient.SmsBatchPendingAbortAsync(batchId);
+            await LoadData();
+        }
+    }
+
+    private async Task ResumeBatch(long batchId)
+    {
+        var message = "Are you sure you want to resume this batch now?";
+        bool confirmed = await alert.Confirm(message, "Confirm");
+
+        if (confirmed)
+        {
+            await apiClient.SmsBatchPendingResumeAsync(batchId);
+            await LoadData();
+        }
+    }
+
+    private void OnSearch(ChangeEventArgs e)
+    {
+        searchText = e.Value?.ToString() ?? string.Empty;
+    }
+
+    private List<SmsBatchResponse>? GetFilteredItems()
+    {
+        if (string.IsNullOrWhiteSpace(searchText))
+            return items;
+
+        return items?.Where(x => x.MessageText.Contains(searchText, 
+            StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+}

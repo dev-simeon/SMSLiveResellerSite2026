@@ -1,0 +1,85 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@using SMSLiveResellerSite2026.Components.Data
+@using SMSLiveResellerSite2026.Components.Formatting
+@using SMSLiveResellerSite2026.Components.Forms
+@using SMSLiveResellerSite2026.Components.Layouts
+@using SMSLiveResellerSite2026.Pages.Credits.Modals
+@using SMSLiveResellerSite2026.Shared
+@page "/Credits/Buy"
+@attribute [Authorize]
+
+<PageTitle>SMSLiveResellerSite2026 - Buy SMS</PageTitle>
+<Title>Buy SMS Credits</Title>
+
+<Card>
+    <Body>
+        <SearchArea>
+            <LeftRight>
+                <Left>
+                    <SearchBox @ref="searchBox">
+                        <InputSelect class="form-select" @bind-Value="status">
+                            <option value="">PAID</option>
+                            <option value="">PENDING</option>
+                            <option value="">FAILED</option>
+                        </InputSelect>
+                    </SearchBox>
+                </Left>
+                <Right>
+                    <Button Type="Button.Style.CUSTOM" CustomIcon="fa fa-shopping-cart"
+                            @onclick="e => purchaseModal.Show()">
+                        Buy SMS Credits...
+                    </Button>
+                </Right>
+            </LeftRight>
+        </SearchArea>
+        <Table DataSource="ds">
+            <Columns>
+                <Column Header="Date Created">
+                    <FormatDate DateTime="@context.DateCreated"></FormatDate>
+                </Column>
+                <Column Header="Provider ID">
+                    @context.ProviderID
+                </Column>
+                <Column Header="Reference">
+                    @context.Reference
+                </Column>
+                <Column Header="Quantity">
+                    <FormatNumber Number="@context.Quantity"></FormatNumber>
+                </Column>
+                <Column Header="Price">
+                    <FormatNumber Currency="@context.Price"></FormatNumber>
+                </Column>
+                <Column Header="Amount">
+                    <FormatNumber Currency="@context.Amount"></FormatNumber>
+                </Column>
+                <Column Header="Status">
+                    <span class="badge text-bg-@(context.IsPaid ? "success" : "warning")">
+                        @(context.IsPaid ? "SUCCESS" : "PENDING")
+                    </span>
+                </Column>
+            </Columns>
+        </Table>
+    </Body>
+    <Footer>
+        <Pager PageState="ds.PageState" OnPageChange="e => ds.SetPage(e).LoadData(alert)" />
+    </Footer>
+</Card>
+
+<PurchaseModal @ref="purchaseModal"></PurchaseModal>
+
+@code {
+    private SearchBox searchBox = new();
+    private string status = string.Empty;
+    private PurchaseModal purchaseModal = new();
+    private ApiDataSource<PurchaseResponse> ds = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        ds.Callback = new((PageState p, FilterState? f) =>
+        {
+            return apiClient.PurchaseListAsync(p.PageNumber, p.PageSize, null, searchBox.Text);
+        });
+        await ds.LoadData(alert);
+    }
+}

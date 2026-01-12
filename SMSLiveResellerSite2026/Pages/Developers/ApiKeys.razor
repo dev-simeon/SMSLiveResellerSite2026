@@ -1,0 +1,123 @@
+﻿@page "/Developers/ApiKeys"
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Authorization
+@using SMSLiveResellerSite2026.Components.Data
+@using SMSLiveResellerSite2026.Components.Formatting
+@using SMSLiveResellerSite2026.Components.Forms
+@using SMSLiveResellerSite2026.Components.Layouts
+@using SMSLiveResellerSite2026.Pages.Accounts.Components
+@using SMSLiveResellerSite2026.Pages.Accounts.SubAccount.Modals
+@using SMSLiveResellerSite2026.Shared
+
+<PageTitle>SMSLiveResellerSite2026 - Api Keys</PageTitle>
+<Title>Your Api Keys</Title>
+
+<Loading NullCheckObject="mainAccount">
+    <Card>
+        <Body>
+            <SearchArea>
+                <LeftRight>
+                    <Left>
+                        <SearchBox @ref="searchBox" @onclick="e => ds.LoadData(alert)">
+                        </SearchBox>
+                    </Left>
+                </LeftRight>
+            </SearchArea>
+
+            <table class="table table-hover align-middle">
+                <thead class="table-primary bg-primary-subtle">
+                    <tr>
+                        <th>Main Account</th>
+                        <th>Api Key</th>
+                        <th></th>
+                        <th>Date Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="width:40%">
+                            @mainAccount?.AccountID
+                        </td>
+                        <td>
+                            @((new Guid(mainAccount.Key)).ToString().ToUpper())
+                        </td>
+                        <td>
+                            <button class="btn btn-outline-secondary" title="Reset API Key">
+                                <i class="fa fa-redo"></i>
+                            </button>
+                        </td>
+                        <td>
+                            <FormatDate DateTime="@mainAccount.DateCreated"></FormatDate>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <Table DataSource="ds">
+                <Columns>
+                    <Column Header="Sub-Accounts" Width="40%">
+                        <SubAccountName Name="@context.AccountName"></SubAccountName>
+                    </Column>
+                    <Column Header="Api Key">
+                        @((new Guid(context.Key)).ToString().ToUpper())
+                    </Column>
+                    <Column Header="">
+                        <button class="btn btn-outline-secondary" title="Reset API Key"
+                                @onclick="e => ResetApiKey(context)">
+                            <i class="fa fa-redo"></i>
+                        </button>
+                    </Column>
+                    <Column Header="Date Created">
+                        <FormatDate DateTime="@context.DateCreated"></FormatDate>
+                    </Column>
+                </Columns>
+            </Table>
+        </Body>
+        <Footer>
+            <Pager PageState="ds.PageState" OnPageChange="e => ds.SetPage(e).LoadData(alert)" />
+        </Footer>
+    </Card>
+</Loading>
+
+@code {
+    private SearchBox searchBox = new();
+    private AccountResponse? mainAccount;
+    private ApiDataSource<AccountResponse> ds = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var res = await apiClient.AccountGetAsync("self");
+
+        if (res.StatusCode == 200)
+            mainAccount = res.Result;
+
+        ds.Callback = new((PageState p, FilterState? f) =>
+        {
+            return apiClient.AccountsListAsync(p.PageNumber, p.PageSize, null, searchBox.Text);
+        });
+        mainAccount.Key = Guid.NewGuid().ToByteArray();
+        await ds.LoadData(alert);
+    }
+
+    private async Task ResetApiKey(AccountResponse account)
+    {
+        try
+        {
+            // var response = await apiClient.AccountUpdateProviderKeyAsync(account-request);
+            //if (response.StatusCode == 200)
+            // {
+            //     await alert.Success("API key reset successfully.", "Success");
+            //     await ds.LoadData(alert); // Reload data to reflect the reset API key
+            // }
+            // else
+            // {
+            await alert.Error("Failed to reset API key", "Error");
+            // }
+        }
+        catch (Exception ex)
+        {
+            await alert.Error(ex.Message, "Error");
+        }
+    }
+}

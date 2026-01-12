@@ -1,0 +1,151 @@
+﻿@using SMSLiveResellerSite2026.Components.Forms
+@using SMSLiveResellerSite2026.Shared
+@typeparam TItem where TItem : class, new()
+
+<EditForm Model="Model" OnValidSubmit="Submit" FormName="@formName">
+    <Modal Title="@title" @bind-Hidden="hideModal" Size="@Size">
+        <Body>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+            <div class="d-flex flex-column flex-fill">
+                @ChildContent(Model)
+            </div>
+        </Body>
+        <Footer>
+            <Button Type="@buttonStyle">@buttonText</Button>
+        </Footer>
+    </Modal>
+</EditForm>
+
+
+@code {
+    [Parameter, EditorRequired] public string? LabelText { get; set; }
+    [Parameter, EditorRequired] public RenderFragment<TItem?>? ChildContent { get; set; }
+
+    [Parameter] public EventCallback OnDelete { get; set; }
+    [Parameter] public EventCallback OnUpdate { get; set; }
+    [Parameter] public EventCallback OnCreate { get; set; }
+    [Parameter] public EventCallback OnDownload { get; set; }
+    [Parameter] public EventCallback OnCompleted { get; set; }
+    [Parameter] public Modal.ModalSize Size { get; set; } = Modal.ModalSize.MEDIUM;
+
+    public enum EditModeEnum { CREATE, EDIT, DELETE, DOWNLOAD }
+
+    public TItem Model = new();
+    private bool hideModal = true;
+    private string? title, buttonText, formName;
+    private Button.Style buttonStyle = Button.Style.SAVE;
+
+    public EditModeEnum EditMode = EditModeEnum.CREATE;
+
+    protected override void OnParametersSet()
+    {
+        formName = LabelText + "Form";
+    }
+
+    public void Show(TItem? item = null)
+    {
+        EditMode = item == null ? EditModeEnum.CREATE : EditModeEnum.EDIT;
+        Model = item != null ? item : new();
+
+        title = $"Create New {LabelText}";
+        buttonText = $"Create {LabelText}";
+        buttonStyle = Button.Style.SAVE;
+
+        if (EditMode == EditModeEnum.EDIT)
+        {
+            title = $"Edit {LabelText}";
+            buttonText = $"Update {LabelText}";
+        }
+        hideModal = false;
+        StateHasChanged();
+    }
+
+    public void Delete(TItem item)
+    {
+        EditMode = EditModeEnum.DELETE;
+        Model = item;
+        title = $"Delete {LabelText}";
+        buttonText = $"Delete {LabelText}";
+        buttonStyle = Button.Style.DELETE;
+        hideModal = false;
+        StateHasChanged();
+    }
+
+    public void Download(TItem? item = null)
+    {
+        EditMode = EditModeEnum.DOWNLOAD;
+        Model = item != null ? item : new();
+        title = $"Download {LabelText}";
+        buttonText = $"Download {LabelText}";
+        buttonStyle = Button.Style.DOWNLOAD;
+        hideModal = false;
+        StateHasChanged();
+    }
+
+    private async Task Submit()
+    {
+        try
+        {
+            switch (EditMode)
+            {
+                case EditModeEnum.CREATE:
+                    await TryInvokeAsync(OnCreate, "Create");
+                    break;
+                case EditModeEnum.EDIT:
+                    await TryInvokeAsync(OnUpdate, "Update");
+                    break;
+                case EditModeEnum.DELETE:
+                    await TryInvokeAsync(OnDelete, "Delete");
+                    break;
+                case EditModeEnum.DOWNLOAD:
+                    await TryInvokeAsync(OnDownload, "Download");
+                    break;
+                default:
+                    await alert.Info($"EditModal.EditMode = [{EditMode}] is invalid", "Error");
+                    break;
+            }
+            await OnAfterSuccessAsync();
+        }
+        // Todo
+        catch (ApiException ex)
+        {
+            if (ex.StatusCode >= 200 && ex.StatusCode < 300)
+            {
+                await OnAfterSuccessAsync();
+                return;
+            }
+            await alert.Error(ex.FormatApiMessage(), "Error");
+        }
+        catch (Exception ex)
+        {
+            await alert.Error(ex.FormatApiMessage(), "Error");
+        }
+    }
+
+    private async Task OnAfterSuccessAsync()
+    {
+        await alert.Success($"Operation was successful", "Success");
+        hideModal = true;
+ 
+        switch (EditMode)
+        {
+            case EditModeEnum.CREATE:
+            case EditModeEnum.DELETE:
+                if (OnCompleted.HasDelegate)
+                    await OnCompleted.InvokeAsync();
+                break;
+        }
+    }
+
+    private async Task TryInvokeAsync(EventCallback callback, string name)
+    {
+        if (!callback.HasDelegate)
+        {
+            await alert.Info($"On{name} Delegate is missing", "Error");
+            return;
+        }
+        await callback.InvokeAsync();
+    }
+    
+}

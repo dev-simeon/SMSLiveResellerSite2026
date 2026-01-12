@@ -1,0 +1,145 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Sections
+@using SMSLiveResellerSite2026.Features.Authentication
+@inject AuthenticationStateProvider auth;
+@inherits LayoutComponentBase
+@attribute [Authorize]
+
+@* <div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+ *@
+
+
+  <AutoSpinner />
+    <SideMenu OnClose="ToggleMenu" />
+    <Alert />
+
+    <main class="sb-main pb-3 h-100">
+        <header class="navbar py-2 bg-primary-subtle shadow">
+            <div class="container-fluid justify-content-between">
+                <div class="d-flex gap-2 align-items-center">
+                    <button class="btn btn-toolbar" @onclick="ToggleMenu">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <ul class="nav d-none d-md-flex">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Messaging/Compose">Messaging</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Accounts/Dashboard">Accounts</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Credits/Buy">Buy Credits</a>
+                        </li>
+                    </ul>
+                    <div class="dropdown d-md-none">
+                        <button class="btn btn-primary dropdown-toggle" type="button" @onclick="ToggleNavDropdown">
+                            Menu
+                        </button>
+                        <div class="dropdown-menu @(hideNavDropdown ? "" : "show")">
+                            <a class="dropdown-item" href="/Messaging/Compose">Messaging</a>
+                            <a class="dropdown-item" href="/Accounts/Dashboard">Accounts</a>
+                            <a class="dropdown-item" href="/Credits/Buy">Buy Credits</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-3 align-items-center">
+                    <a class="nav-link" href="/Support/Tickets">
+                        <i class="bi bi-bell-fill fs-4"></i>
+                    </a>
+                    <div class="dropdown position-relative" @onfocusout="HideDropdown">
+                        <a class="dropdown-toggle nav-link d-flex gap-3 align-items-center" href="#"
+                            @onclick="ToggleDropdown" @onclick:preventDefault>
+                            <span>@fullName</span>
+                        </a>
+                        <div style=" left: auto;right: 0;transform: none;max-width: calc(100vw - 2rem);"
+                            class="dropdown-menu dropdown-menu-end @(hideDropdown ? "" : "show")">
+                            <a class="dropdown-item" href="/Accounts/Profile">Account Profile</a>
+                            <hr class="dropdown-divider" />
+                            <a class="dropdown-item" href="/Logout">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="p-4">
+            <header class="d-flex flex-column flex-lg-row justify-content-between pb-2 gap-3 gap-lg-0">
+                <SectionOutlet SectionName="title" />
+                <nav>
+                    <Breadcrumb />
+                </nav>
+            </header>
+            @Body
+        </section>
+    </main>
+
+
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+
+
+@code {
+    private bool hideMainMenu = false;
+    private bool hideDropdown = true;
+    private bool hideNavDropdown = true;
+
+    private string? avatarUrl;
+    private string? fullName;
+
+    private void ToggleMenu() => hideMainMenu = !hideMainMenu;
+    private void ToggleNavDropdown() => hideNavDropdown = !hideNavDropdown;
+    private async Task HideNavDropdown()
+    {
+        await Task.Delay(200);
+        hideNavDropdown = true;
+    }
+    private void ToggleDropdown() => hideDropdown = !hideDropdown;
+    private async Task HideDropdown()
+    {
+        await Task.Delay(200);
+        hideDropdown = true;
+    }
+
+    // Moved JS-interop backed call here so it runs after rendering (JS interop is available).
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        try
+        {
+            var member = await ((SmsAuthProvider)auth).GetMember();
+
+            if (member != null)
+            {
+                fullName = member.Email?.ToLower();
+                // avatarUrl = member.AvatarUrl;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            // JS interop not available yet; swallow or log as appropriate.
+        }
+    }
+}

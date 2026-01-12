@@ -1,0 +1,109 @@
+﻿@page "/"
+@using System.ComponentModel.DataAnnotations
+@using SMSLiveResellerSite2026.Features.Authentication
+@using System.Net.Http.Headers
+@layout EmptyLayout
+@attribute [AllowAnonymous]
+
+@inject NavigationManager nav
+@inject HttpClient httpClient
+@inject AuthenticationStateProvider auth
+
+<PageTitle>Login</PageTitle>
+
+<main class="d-flex vh-100">
+    <aside class="col-12 col-md-6 col-lg-5 col-xl-4 p-5 shadow">
+
+            <EditForm Model="loginModel"
+                      OnValidSubmit="LoginAsync"
+                      OnInvalidSubmit="InvalidLogin">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <InputText class="form-control"
+                               @bind-Value="loginModel.Username" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <InputText class="form-control"
+                               type="password"
+                               @bind-Value="loginModel.Password" />
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 mt-3">
+                    Login
+                </button>
+
+                <p class="mt-3">
+                    <a href="" @onclick="Toggle" @onclick:preventDefault>Forgot password?</a>
+                </p>
+            </EditForm>
+        
+       
+
+    </aside>
+</main>
+
+@code {
+    private bool toggleView;
+
+    private LoginRequest loginModel = new()
+    {
+        ParentID = "a044b5a7-1147-45cb-871a-76546896c4f3"
+    };
+
+    private ResetRequest resetModel = new();
+
+    private async Task LoginAsync()
+    {
+        Console.WriteLine($"Username={loginModel.Username}, Password={loginModel.Password}");
+
+        // var response = await apiClient.LoginAsync(loginModel);
+        var response = loginModel;
+
+        // if (response.StatusCode == 200)
+        // {
+        //     httpClient.DefaultRequestHeaders.Authorization =
+        //         new AuthenticationHeaderValue("Bearer", response.Result.AccessToken);
+
+        //     var apiKey = $"MA-{response.Result.AccessToken}";
+        //     var member = new SmsAuthProvider.UserClaims(loginModel.Username, apiKey);
+
+        //     await ((SmsAuthProvider)auth).SaveAuthenticationState(member);
+        //     nav.NavigateTo("/");
+        // }
+    }
+
+    private void InvalidLogin()
+    {
+        Console.WriteLine($"Invalid: Username={loginModel.Username}, Password={loginModel.Password}");
+    }
+
+    private async Task ResetAsync()
+    {
+        // await apiClient.ResetPasswordAsync(resetModel);
+    }
+
+    private void Toggle() => toggleView = !toggleView;
+
+    public class LoginRequest
+    {
+        [Required]
+        public string Username { get; set; }
+
+        [Required]
+        public string Password { get; set; }
+
+        public string ParentID { get; set; }
+    }
+
+    public class ResetRequest
+    {
+        [Required]
+        public string Username { get; set; }
+    }
+
+}

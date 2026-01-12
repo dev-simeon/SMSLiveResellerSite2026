@@ -1,0 +1,15 @@
+﻿@page "/Messaging/Compose"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+
+<PageTitle>SMSLiveResellerSite2026 - Compose</PageTitle>
+<Title>Compose SMS</Title>
+
+<Tabs>
+    <TabPage Title="Compose Simple" Icon="fa fa-edit">
+        <ComposeSimple></ComposeSimple>
+    </TabPage>
+    <TabPage Title="Compose Template" Icon="fa fa-table">
+        <ComposeTemplate></ComposeTemplate>
+    </TabPage>
+</Tabs>

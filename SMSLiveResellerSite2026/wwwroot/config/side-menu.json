@@ -1,0 +1,107 @@
+[
+  {
+    "Name": "Messaging",
+    "Items": [
+      {
+        "Name": "Compose",
+        "Icon": "fa fa-edit",
+        "Link": "/Messaging/Compose"
+      },
+      {
+        "Name": "Messages",
+        "Icon": "fa fa-envelope",
+        "Link": "/Messaging/Messages"
+      },
+      {
+        "Name": "Contacts",
+        "Icon": "fa fa-address-card",
+        "Link": "/Messaging/Contacts"
+      },
+      {
+        "Name": "Sender IDs",
+        "Icon": "fa fa-fingerprint",
+        "Link": "/Messaging/SenderIds"
+      }
+    ]
+  },
+  {
+    "Name": "Accounts",
+    "Items": [
+      {
+        "Name": "Dashboard",
+        "Icon": "fa fa-chart-line",
+        "Link": "/Accounts/Dashboard"
+      },
+      {
+        "Name": "Sub Accounts",
+        "Icon": "fa fa-users",
+        "Link": "/Accounts/SubAccounts"
+      },
+      {
+        "Name": "My Profile",
+        "Icon": "fa fa-user",
+        "Link": "/Accounts/Profile"
+      }
+    ]
+  },
+  {
+    "Name": "Wallet",
+    "Items": [
+      {
+        "Name": "Buy",
+        "Icon": "fa fa-shopping-cart",
+        "Link": "/Credits/Buy"
+      },
+      {
+        "Name": "Deposits",
+        "Icon": "fa fa-credit-card",
+        "Link": "/Credits/Deposit"
+      },
+      {
+        "Name": "Transfers",
+        "Icon": "fa fa-gift",
+        "Link": "/Credits/Transfer"
+      },
+      {
+        "Name": "Pricing",
+        "Icon": "fa fa-dollar-sign",
+        "Link": "/Credits/Pricing"
+      }
+    ]
+  },
+  {
+    "Name": "Support",
+    "Items": [
+      {
+        "Name": "Tickets",
+        "Icon": "fa fa-headset",
+        "Link": "/Support/Tickets"
+      },
+      {
+        "Name": "Contact Us",
+        "Icon": "fa fa-address-book",
+        "Link": "/Support/Contact"
+      },
+      {
+        "Name": "Coverage",
+        "Icon": "fa fa-globe",
+        "Link": "/Support/Coverage"
+      }
+    ]
+  },
+  {
+    "Name": "Developers",
+    "Items": [
+      {
+        "Name": "Api Keys",
+        "Icon": "fa fa-code",
+        "Link": "/Developers/ApiKeys"
+      },
+      {
+        "Name": "Api Docs",
+        "Icon": "fa fa-book",
+        "Link": "https://smslive247api.readme.io/reference/introduction"
+      }
+    ]
+  }
+]

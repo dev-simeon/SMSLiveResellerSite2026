@@ -1,0 +1,15 @@
+@page "/Logout"
+@page "/Logoff"
+@using Microsoft.AspNetCore.Components.Authorization
+@using SMSLiveResellerSite2026.Features.Authentication
+@inject NavigationManager nav
+@inject AuthenticationStateProvider auth;
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ((SmsAuthProvider)auth).ClearAuthenticationState();
+        var shouldForceReload = !nav.Uri.EndsWith("/login", StringComparison.OrdinalIgnoreCase);
+        nav.NavigateTo("/Login", shouldForceReload);
+    }
+}

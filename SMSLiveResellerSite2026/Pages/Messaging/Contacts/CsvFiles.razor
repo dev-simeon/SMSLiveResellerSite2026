@@ -1,0 +1,79 @@
+﻿@using SMSLiveResellerSite2026.Components.Data
+@using SMSLiveResellerSite2026.Components.Formatting
+@using SMSLiveResellerSite2026.Components.Forms
+@using SMSLiveResellerSite2026.Components.Layouts
+@using SMSLiveResellerSite2026.Pages.Messaging.Contacts.Modals
+
+<Card>
+    <Body>
+        <SearchArea>
+            <LeftRight>
+                <Left>
+                    <input type="search" class="form-control" placeholder="Search..." @oninput="e => OnSearch(e.Value?.ToString())" />
+                </Left>
+                <Right>
+                    <Button Type="Button.Style.ADD" @onclick="e => batchFileModal.Show()">
+                        Upload CSV File...
+                    </Button>
+                </Right>
+            </LeftRight>
+        </SearchArea>
+        <Table Items="filteredItems">
+            <Columns>
+                <Column Header="File Name" Width="45%">@context.Description</Column>
+                <Column Header="Total Numbers" Width="15%">
+                    <FormatNumber Number="@context.TotalNumbers"></FormatNumber>
+                </Column>
+                <Column Header="Date Uploaded">
+                    <FormatDate DateTime="@context.DateCreated"></FormatDate>
+                </Column>
+                <Column Header="File Type">
+                    <span class="badge text-bg-info">.@context.FileType.ToUpper()</span>
+                </Column>
+                <Column>
+                    <Actions OnDownload="e => batchFileModal.Download(context)"
+                             OnDelete="e => batchFileModal.Delete(context)">
+                    </Actions>
+                </Column>
+            </Columns>
+        </Table>
+    </Body>
+</Card>
+
+<a href="https://new.SMSLiveResellerSite2026.com/Support/Docs/Help/Html/Template%20SMS.htm" target="_blank" class="text-decoration-none mb-2">
+    Click here for step-by-step instruction on how to setup a template SMS.
+</a>
+
+
+<BulkFileModal @ref="batchFileModal" ForCSV="true" OnCompleted="FetchData"></BulkFileModal>
+
+@code {
+    private BulkFileModal batchFileModal = new();
+
+    private List<BatchFileResponse>? items;
+    private List<BatchFileResponse>? filteredItems;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchData();
+    }
+
+    private async Task FetchData()
+    {
+        var response = await apiClient.BatchFileListAsync();
+
+        if (response.StatusCode == 200)
+        {
+            items = response.Result.Where(x => x.FileType == "csv").ToList();
+            filteredItems = items;
+        }
+    }
+
+    private void OnSearch(string? input)
+    {
+        if (string.IsNullOrEmpty(input))
+            filteredItems = items;
+        else
+            filteredItems = items?.Where(x => x.Description.Contains(input, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+}

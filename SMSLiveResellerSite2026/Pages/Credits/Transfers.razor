@@ -1,0 +1,70 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@using SMSLiveResellerSite2026.Components.Data
+@using SMSLiveResellerSite2026.Components.Formatting
+@using SMSLiveResellerSite2026.Components.Forms
+@using SMSLiveResellerSite2026.Components.Layouts
+@using SMSLiveResellerSite2026.Pages.Credits.Modals
+ @using SMSLiveResellerSite2026.Shared
+@page "/Credits/Transfer"
+@attribute [Authorize]
+
+<PageTitle>SMSLiveResellerSite2026 - Transfers</PageTitle>
+<Title>Transfer SMS Credits</Title>
+
+<Card>
+    <Body>
+        <SearchArea>
+            <LeftRight>
+                <Left>
+                    <SearchBox @ref="searchBox" @onclick="() => ds.LoadData(alert)">
+                    </SearchBox>
+                </Left>
+                <Right>
+                    <Button Type="Button.Style.CUSTOM" CustomIcon="fa fa-paper-plane" 
+                            @onclick="e => transferModal.Show()">
+                        Transfer Credits...
+                    </Button>
+                </Right>
+            </LeftRight>
+        </SearchArea>
+        <Table DataSource="ds">
+            <Columns>
+                <Column Header="Request Date">
+                    <FormatDate DateTime="@context.DateCreated"></FormatDate>
+                </Column>
+                <Column Header="Sender">
+                    @context.SenderName
+                </Column>
+                <Column Header="Recipient">
+                    @context.RecipientName
+                </Column>
+                <Column Header="Credits">
+                    <FormatNumber Number="@context.Credits"></FormatNumber>
+                </Column>
+                <Column Header="Status">
+                    <span class="badge text-bg-success">TRANSFERED</span>
+                </Column> 
+            </Columns>
+        </Table>
+    </Body>
+    <Footer>
+        <Pager PageState="ds.PageState" OnPageChange="e => ds.SetPage(e).LoadData(alert)" />
+    </Footer> 
+</Card>
+
+<TransferModal @ref="transferModal"></TransferModal>
+
+@code {
+    private SearchBox searchBox = new();
+    private TransferModal transferModal = new();
+    private ApiDataSource<TransferResponse> ds = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        ds.Callback = new((PageState p, FilterState? f) =>
+        {
+            return apiClient.TransferListAsync(p.PageNumber, p.PageSize, null, searchBox.Text);
+        });
+        await ds.LoadData(alert);
+    }
+}

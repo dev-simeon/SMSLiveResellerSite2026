@@ -1,0 +1,18 @@
+﻿@page "/Messaging/Contacts"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+
+<PageTitle>SMSLiveResellerSite2026 - Contacts</PageTitle>
+<Title>My Contacts</Title>
+
+<Tabs>
+    <TabPage Title="Phonebook" Icon="fa fa-address-book">
+        <PhoneBook></PhoneBook>
+    </TabPage>
+    <TabPage Title="Bulk Files" Icon="fa fa-file-upload">
+        <BulkFiles></BulkFiles>
+    </TabPage>
+    <TabPage Title="CSV/Excel Files" Icon="fa fa-file-excel">
+       <CsvFiles></CsvFiles>
+    </TabPage>
+</Tabs>
