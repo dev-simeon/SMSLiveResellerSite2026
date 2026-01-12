@@ -7,6 +7,13 @@
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="PackageDependencies\**" />
+    <Content Remove="PackageDependencies\**" />
+    <EmbeddedResource Remove="PackageDependencies\**" />
+    <None Remove="PackageDependencies\**" />
+  </ItemGroup>
+
 
 	<ItemGroup>
     <PackageReference Include="Blazor.Storage" Version="5.0.0" />
